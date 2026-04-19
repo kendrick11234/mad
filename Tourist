@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+
+  List places = [
+    {"name": "Goa", "img": "https://picsum.photos/200"},
+    {"name": "Manali", "img": "https://picsum.photos/201"},
+    {"name": "Kashmir", "img": "https://picsum.photos/202"},
+    {"name": "Kerala", "img": "https://picsum.photos/203"},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Tourist App"),
+        backgroundColor: Colors.blue,
+      ),
+
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+
+            // 🔥 Top Image
+            Image.network(
+              "https://picsum.photos/400/200",
+              fit: BoxFit.cover,
+            ),
+
+            SizedBox(height: 10),
+
+            // 🔥 Horizontal ListView
+            Container(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: places.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    child: Container(
+                      width: 120,
+                      child: Column(
+                        children: [
+                          Image.network(
+                            places[index]["img"],
+                            height: 70,
+                            fit: BoxFit.cover,
+                          ),
+                          Text(places[index]["name"]),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            SizedBox(height: 10),
+
+            // 🔥 GridView
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate:
+                  SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+              ),
+              itemCount: places.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  child: Column(
+                    children: [
+                      Image.network(
+                        places[index]["img"],
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
+                      Text(places[index]["name"]),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
