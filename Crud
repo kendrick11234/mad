@@ -1,0 +1,123 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ExpensePage(),
+    );
+  }
+}
+
+class ExpensePage extends StatefulWidget {
+  @override
+  _ExpensePageState createState() => _ExpensePageState();
+}
+
+class _ExpensePageState extends State<ExpensePage> {
+
+  List<String> expenses = [];
+  TextEditingController controller = TextEditingController();
+
+  // CREATE
+  void addExpense() {
+    setState(() {
+      if (controller.text.isNotEmpty) {
+        expenses.add(controller.text);
+        controller.clear();
+      }
+    });
+  }
+
+  // DELETE
+  void deleteExpense(int index) {
+    setState(() {
+      expenses.removeAt(index);
+    });
+  }
+
+  // UPDATE
+  void updateExpense(int index) {
+    setState(() {
+      if (controller.text.isNotEmpty) {
+        expenses[index] = controller.text;
+        controller.clear();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Expenditure App"),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+
+      body: Container(
+        padding: EdgeInsets.all(15),
+        child: Column(
+          children: [
+
+            // 🔥 Input Field
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: "Enter expense",
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            SizedBox(height: 10),
+
+            // 🔥 Add Button
+            ElevatedButton(
+              onPressed: addExpense,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+              ),
+              child: Text("Add Expense"),
+            ),
+
+            SizedBox(height: 10),
+
+            // 🔥 List (READ)
+            Expanded(
+              child: ListView.builder(
+                itemCount: expenses.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    elevation: 5,
+                    margin: EdgeInsets.symmetric(vertical: 5),
+                    child: ListTile(
+                      title: Text(expenses[index]),
+
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+
+                          // UPDATE
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () => updateExpense(index),
+                          ),
+
+                          // DELETE
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => deleteExpense(index),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
