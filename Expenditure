@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: ExpensePage(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class ExpensePage extends StatefulWidget {
+  @override
+  _ExpensePageState createState() => _ExpensePageState();
+}
+
+class _ExpensePageState extends State<ExpensePage> {
+
+  List expenses = [];
+  TextEditingController controller = TextEditingController();
+
+  void addExpense() {
+    setState(() {
+      expenses.add(controller.text);
+      controller.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Expenditure App")),
+
+      body: Column(
+        children: [
+
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: "Enter expense",
+            ),
+          ),
+
+          ElevatedButton(
+            onPressed: addExpense,
+            child: Text("Add"),
+          ),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: expenses.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(expenses[index]),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
