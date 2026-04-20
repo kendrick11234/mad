@@ -1,0 +1,251 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+// ---------------- APP ----------------
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomePage(),
+    );
+  }
+}
+
+// ---------------- MODEL ----------------
+class TransactionModel {
+  String title;
+  String note;
+  double amount;
+  bool isIncome;
+
+  TransactionModel(this.title, this.note, this.amount, this.isIncome);
+}
+
+// ---------------- HOME PAGE ----------------
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  List<TransactionModel> transactions = [];
+
+  double get income => transactions
+      .where((t) => t.isIncome)
+      .fold(0, (sum, t) => sum + t.amount);
+
+  double get expense => transactions
+      .where((t) => !t.isIncome)
+      .fold(0, (sum, t) => sum + t.amount);
+
+  double get balance => income - expense;
+
+  void addTransaction(TransactionModel t) {
+    setState(() {
+      transactions.add(t);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.purple[100],
+
+      appBar: AppBar(
+        title: Text("Money Manager"),
+        backgroundColor: Colors.purple,
+      ),
+
+      body: Column(
+        children: [
+
+          // BALANCE CARD
+          Container(
+            margin: EdgeInsets.all(10),
+            padding: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Text("Available Balance"),
+                Text(
+                  "Rs. ${balance.toStringAsFixed(0)}",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+
+          // INCOME & EXPENSE
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              buildCard("Income", income, Colors.green),
+              buildCard("Expense", expense, Colors.red),
+            ],
+          ),
+
+          SizedBox(height: 10),
+
+          Text("Recent Transactions"),
+
+          // LIST
+          Expanded(
+            child: ListView.builder(
+              itemCount: transactions.length,
+              itemBuilder: (context, index) {
+                var t = transactions[index];
+                return ListTile(
+                  leading: Icon(Icons.account_balance_wallet),
+                  title: Text(t.title),
+                  subtitle: Text(t.note),
+                  trailing: Text(
+                    "${t.isIncome ? '+' : '-'} ₹${t.amount}",
+                    style: TextStyle(
+                      color: t.isIncome ? Colors.green : Colors.red,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+
+      // ADD BUTTON
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.purple,
+        child: Icon(Icons.add),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddPage()),
+          );
+
+          if (result != null) {
+            addTransaction(result);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildCard(String title, double amount, Color color) {
+    return Container(
+      width: 150,
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Text(title),
+          Text(
+            "Rs. ${amount.toStringAsFixed(0)}",
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------- ADD PAGE ----------------
+class AddPage extends StatefulWidget {
+  @override
+  _AddPageState createState() => _AddPageState();
+}
+
+class _AddPageState extends State<AddPage> {
+
+  final amountController = TextEditingController();
+  final titleController = TextEditingController();
+  final noteController = TextEditingController();
+
+  bool isIncome = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.purple[100],
+
+      appBar: AppBar(
+        title: Text("Add Transaction"),
+        backgroundColor: Colors.purple,
+      ),
+
+      body: Padding(
+        padding: EdgeInsets.all(15),
+        child: Column(
+          children: [
+
+            // DROPDOWN
+            DropdownButton<bool>(
+              value: isIncome,
+              items: [
+                DropdownMenuItem(value: false, child: Text("Expense")),
+                DropdownMenuItem(value: true, child: Text("Income")),
+              ],
+              onChanged: (val) {
+                setState(() {
+                  isIncome = val!;
+                });
+              },
+            ),
+
+            // AMOUNT
+            TextField(
+              controller: amountController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: "Amount"),
+            ),
+
+            // TITLE
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(labelText: "Title"),
+            ),
+
+            // NOTE
+            TextField(
+              controller: noteController,
+              decoration: InputDecoration(labelText: "Note"),
+            ),
+
+            SizedBox(height: 20),
+
+            // BUTTON
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+              ),
+              child: Text("Add Transaction"),
+              onPressed: () {
+
+                if (amountController.text.isEmpty ||
+                    titleController.text.isEmpty) return;
+
+                final t = TransactionModel(
+                  titleController.text,
+                  noteController.text,
+                  double.parse(amountController.text),
+                  isIncome,
+                );
+
+                Navigator.pop(context, t);
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
